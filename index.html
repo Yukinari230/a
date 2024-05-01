@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+
+<title>アナログ時計のウェブブラウザ版</title>
+<link rel="canonical" href="https://testpage.jp/tool/analog_clock.php">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
+<meta name="format-detection" content="telephone=no">
+
+<link rel="stylesheet" href="./index_p.css?20210919">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TZPP4HSBVE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-TZPP4HSBVE');
+</script>
+
+</head>
+<body>
+
+
+
+<!-- ヘッダー -->
+<header id="page_header">
+<div class="page_wrap">
+<div class="site_logo"><img src="/data/img/icon.svg" width="25" height="25" alt="アイコン"> <a href="/"><img src="/data/img/logo.svg" width="130" height="23" alt="testpage.jp"></a></div>
+</div>
+</header>
+
+
+
+<!-- メイン -->
+<div id="page_content">
+<div class="page_wrap">
+<div id="page_main">
+
+
+<h1>アナログ時計</h1>
+
+
+<style>
+#ex_clock {position:relative;height:720px;}
+#ex_clock canvas {position:absolute;width:98%;max-width:720px;height:auto;}
+#ex_now_day, #ex_now_hm {font-size:1.5rem;}
+#ex_now_hm span {font-size:1.1rem;}
+</style>
+
+
+<div id="ex_now_day">-:-</div>
+<div id="ex_now_hm">-:-</div>
+<div id="ex_gengou">-:-</div>
+<div id="ex_en_day">-:-</div>
+
+<br>
+色の変更<br />
+<select id="ex_clock_type">
+<option value="white">ホワイト</option>
+<option value="green">グリーン</option>
+<option value="darkgreen">ダークグリーン</option>
+<option value="orange">オレンジ</option>
+<option value="darkorange">ダークオレンジ</option>
+</select>
+
+<div id="ex_clock">
+<canvas id="ex_clock_back"></canvas>
+<canvas id="ex_clock_hour"></canvas>
+<canvas id="ex_clock_min"></canvas>
+<canvas id="ex_clock_sec"></canvas>
+</div>
+
+
+
+<script>
+var img_back = new Image();
+img_back.src = "img/clock_back_white.png";
+var clock_width = 720;
+var clock_color = 'rgb(50, 50, 50)';
+
+var img_back_white = new Image();
+img_back_white.src = "img/clock_back_white.png";
+var img_back_green = new Image();
+img_back_green.src = "img/clock_back_green.png";
+var img_back_darkgreen = new Image();
+img_back_darkgreen.src = "img/clock_back_darkgreen.png";
+var img_back_orange = new Image();
+img_back_orange.src = "img/clock_back_orange.png";
+var img_back_darkorange = new Image();
+img_back_darkorange.src = "img/clock_back_darkorange.png";
+
+document.getElementById('ex_clock_type').addEventListener('change', function(){
+	var clock_type = document.getElementById('ex_clock_type');
+	var i = clock_type.selectedIndex;
+	var s_value = clock_type.options[i].value;
+	
+	switch(s_value){
+		case 'white':
+			img_back.src = img_back_white.src;
+			clock_color = 'rgb(50, 50, 50)';
+			break;
+		case 'green':
+			img_back.src = img_back_green.src;
+			clock_color = 'rgb(50, 50, 50)';
+			break;
+		case 'darkgreen':
+			img_back.src = img_back_darkgreen.src;
+			clock_color = 'rgb(200, 255, 70)';
+			break;
+		case 'orange':
+			img_back.src = img_back_orange.src;
+			clock_color = 'rgb(50, 50, 50)';
+			break;
+		case 'darkorange':
+			img_back.src = img_back_darkorange.src;
+			clock_color = 'rgb(230, 160, 30)';
+			break;
+	}
+	
+	var now_d = new Date();
+	clock_back();
+	clock_hour(now_d);
+	clock_min(now_d);
+	clock_sec(now_d);
+	
+}, false);
+
+function clock_sec(now_d){
+	//秒
+	var sec = now_d.getSeconds();
+	var canvas = document.getElementById('ex_clock_sec');
+	
+	if(canvas.getContext){
+		var context = canvas.getContext('2d');
+		
+		context.clearRect(0, 0, clock_width, clock_width);
+		context.save();
+		
+		//context.drawImage(img_frame, 0, 0);
+		
+		context.fillStyle = clock_color;
+		context.translate(clock_width / 2, clock_width / 2);
+		context.rotate((sec * 6) / 180 * Math.PI);
+		context.fillRect(-2, -290, 4, 350);
+		
+		context.fillStyle = 'rgb(50, 50, 50)';
+		context.beginPath();
+		context.arc(0, 0, 20, 0 * Math.PI, 2 * Math.PI, true);
+		context.closePath();
+		context.fill();
+		
+		//context.drawImage(img_sec, -img_sec.width/2, -img_sec.height/5);
+		context.restore();
+	}
+}
+
+function clock_min(now_d){
+	//分
+	var min = now_d.getMinutes();
+	var sec = now_d.getSeconds();
+	var canvas = document.getElementById('ex_clock_min');
+	
+	if(canvas.getContext){
+		var context = canvas.getContext('2d');
+		
+		context.clearRect(0, 0, clock_width, clock_width);
+		context.save();
+		
+		context.fillStyle = clock_color;
+		context.translate(clock_width / 2, clock_width / 2);
+		//context.rotate((min * 6) / 180 * Math.PI);
+		context.rotate((((min * 6) / 180) + (sec / 1800)) * Math.PI);
+		context.fillRect(-10, -290, 20, 350);
+		
+		context.restore();
+	}
+}
+
+function clock_hour(now_d){
+	//時間
+	var hour = now_d.getHours();
+	var min = now_d.getMinutes();
+	var canvas = document.getElementById('ex_clock_hour');
+	
+	if(canvas.getContext){
+		var context = canvas.getContext('2d');
+		
+		context.clearRect(0, 0, clock_width, clock_width);
+		context.save();
+		
+		context.fillStyle = clock_color;
+		context.translate(clock_width / 2, clock_width / 2);
+		//context.rotate((hour * 30) / 180 * Math.PI);
+		context.rotate((((hour * 30) / 180) + (min / 360)) * Math.PI);
+		context.fillRect(-15, -180, 30, 240);
+		
+		context.restore();
+	}
+}
+
+function clock_back(){
+	//背景
+	var canvas = document.getElementById('ex_clock_back');
+	var clock_height = clock_width;
+	
+	var center_x = clock_width / 2;
+	var center_y = clock_height / 2;
+	//var bezel = clock_width / 4;
+	//var num_r = (clock_width / 2) - (bezel);
+	//var font_size = clock_width / 8;
+	var memori_r = center_x - 45;
+	
+	if(canvas.getContext){
+		var context = canvas.getContext('2d');
+		
+		context.clearRect(0, 0, clock_width, clock_width);
+		context.save();
+		
+		/*
+		//背景
+		context.fillStyle = "rgb(50, 50, 50)";
+		context.fillRect(0, 0, clock_width, clock_height);
+		
+		//中央キャンバス
+		context.fillStyle = "rgb(255, 255, 255)";
+		context.fillRect(bezel, bezel, width - bezel * 2, height - bezel * 2);
+		
+		//ベゼル線
+		context.strokeStyle = "rgb(255, 255, 255)";
+		context.lineWidth = bezel;
+		context.lineCap = "round";
+		context.lineJoin = "round";
+		context.beginPath();
+		context.moveTo(120, 120);
+		context.lineTo(width - 120, 120);
+		context.lineTo(width - 120, height - 120);
+		context.lineTo(120, height - 120);
+		context.lineTo(120, 120);
+		context.stroke();
+		context.closePath();
+		
+		//数字
+		context.fillStyle = "rgb(0, 0, 0)";
+		context.font = font_size + "px Century, serif";
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.fillText("12", center_x, center_y - num_r);
+		context.fillText("3", center_x + num_r, center_y);
+		context.fillText("6", center_x, center_y + num_r);
+		context.fillText("9", center_x - num_r, center_y);
+		*/
+		
+		
+		//背景画像
+		context.drawImage(img_back, 0, 0);
+		
+		//目盛
+		context.fillStyle = clock_color;
+		context.translate(center_x, center_y);
+		
+		for(let i=0;i<60;i++){
+			context.save();
+			context.rotate((i * 6) / 180 * Math.PI);
+			context.fillRect(-3, -memori_r, 6, 18);
+			context.restore();
+		}
+		
+		//context.fillStyle = 'rgb(50, 50, 50)';
+		
+		for(let i=0;i<12;i++){
+			context.save();
+			context.rotate((i * 5 * 6) / 180 * Math.PI);
+			context.fillRect(-10, -memori_r, 20, 22);
+			context.restore();
+		}
+		
+		context.restore();
+	}
+}
+
+function now_date(now_d){
+	//日時・文字
+	var jp_youbi = ['日','月','火','水','木','金','土'];
+	var jp_tsuki = [['睦月','むつき'],['如月','きさらぎ'],['弥生','やよい'],['卯月','うづき'],['皐月','さつき'],['水無月','みなづき'],['文月','ふみづき'],['葉月','はづき'],['長月','ながつき'],['神無月','かんなづき'],['霜月','しもつき'],['師走','しわす']];
+	var eto =  [['申','さる'],['酉','とり'],['戌','いぬ'],['亥','い(いのしし)'],['子','ね(ねずみ)'],['丑','うし'],['寅','とら'],['卯','う(うさぎ)'],['辰','たつ'],['巳','み(へび)'],['午','うま'],['未','ひつじ']];
+	
+	var en_youbi = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+	var en_tsuki = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+	
+	var now_year = now_d.getFullYear();
+	var now_month = now_d.getMonth();
+	var now_day = now_d.getDay();
+	var now_hour = now_d.getHours();
+	var eto_koku = [];
+	
+	if(now_hour >= 23 || now_hour < 1){
+		eto_koku = eto[4];
+	}else if(now_hour >= 1 && now_hour < 3){
+		eto_koku = eto[5];
+	}else if(now_hour >= 3 && now_hour < 5){
+		eto_koku = eto[6];
+	}else if(now_hour >= 5 && now_hour < 7){
+		eto_koku = eto[7];
+	}else if(now_hour >= 7 && now_hour < 9){
+		eto_koku = eto[8];
+	}else if(now_hour >= 9 && now_hour < 11){
+		eto_koku = eto[9];
+	}else if(now_hour >= 11 && now_hour < 13){
+		eto_koku = eto[10];
+	}else if(now_hour >= 13 && now_hour < 15){
+		eto_koku = eto[11];
+	}else if(now_hour >= 15 && now_hour < 17){
+		eto_koku = eto[0];
+	}else if(now_hour >= 17 && now_hour < 19){
+		eto_koku = eto[1];
+	}else if(now_hour >= 19 && now_hour < 21){
+		eto_koku = eto[2];
+	}else if(now_hour >= 21 && now_hour < 23){
+		eto_koku = eto[3];
+	}
+	
+	var jp_day = now_year + '年' + (now_month + 1) + '月' + now_d.getDate() + '日' + '(' + jp_youbi[now_day] + ')';
+		
+	var jp_hm = ('0' + now_hour).slice(-2) + ':' + ('0' + now_d.getMinutes()).slice(-2)
+		+ ' <span>' + ('0' + now_d.getSeconds()).slice(-2) + '</span>';
+	
+	var gengou = '令和' + get_gengou(now_year, '令和') + '年'
+		+ '(平成' + get_gengou(now_year, '平成') + '年)'
+		+ ' / <ruby>' + jp_tsuki[now_month][0] + '<rp>(</rp><rt>' + jp_tsuki[now_month][1] + '</rt><rp>)</rp></ruby>'
+		+ ' / <ruby>' + eto[(now_year % 12)][0] + '<rp>(</rp><rt>' + eto[(now_year % 12)][1] + '</rt><rp>)</rp></ruby>年'
+		+ ' / <ruby>' + eto_koku[0] + '<rp>(</rp><rt>' + eto_koku[1] + '</rt><rp>)</rp></ruby>の刻';
+	
+	var en_day = 'Month: ' + en_tsuki[now_month] + ' / Week: ' + en_youbi[now_day];
+	
+	//console.log(eto_koku);
+	
+	document.getElementById('ex_now_day').innerHTML = jp_day;
+	document.getElementById('ex_now_hm').innerHTML = jp_hm;
+	document.getElementById('ex_gengou').innerHTML = gengou;
+	document.getElementById('ex_en_day').innerHTML = en_day;
+}
+
+function get_gengou(year, type){
+	var g_num = 0;
+
+	switch(type){
+		case '令和':
+			g_num = year - 2018;
+			break;
+		case '平成':
+			g_num = year - 1988;
+			break;
+	}
+	
+	if(g_num == 1){
+		g_num = '元';
+	}
+	
+	return g_num;
+}
+
+window.addEventListener('load', function(){
+	//キャンバスサイズ設定
+	var clock_height = clock_width;
+	
+	var cv_back = document.getElementById('ex_clock_back');
+	cv_back.setAttribute("width", clock_width);
+	cv_back.setAttribute("height", clock_height);
+	
+	var cv_sec = document.getElementById('ex_clock_sec');
+	cv_sec.setAttribute("width", clock_width);
+	cv_sec.setAttribute("height", clock_height);
+	
+	var cv_min = document.getElementById('ex_clock_min');
+	cv_min.setAttribute("width", clock_width);
+	cv_min.setAttribute("height", clock_height);
+	
+	var cv_hour = document.getElementById('ex_clock_hour');
+	cv_hour.setAttribute("width", clock_width);
+	cv_hour.setAttribute("height", clock_height);
+	
+	clock_back();
+	
+	//インターバル
+	var intervalID = window.setInterval(function(){
+		disp_clock();
+	}, 1000);
+}, false);
+
+function disp_clock(){
+	var now_d = new Date();
+	now_date(now_d);
+	clock_hour(now_d);
+	clock_min(now_d);
+	clock_sec(now_d);
+}
+
+(function(){
+	//disp_clock();
+})();
+</script>
+
+
+
+
+<h3>使い方</h3>
+<ul>
+<li>本ツールは、ウェブブラウザ上で動作するアナログ式の時計です。
+分針、時針、秒針を表示し、1秒毎に秒針が動きます。
+アナログ式は、残り時間や経過した時間を目で見て把握しやすいのがメリットです。
+</li>
+
+<li>デジタル機器が溢れる昨今、アナログ式は時計を買うか、専用のアプリをインストールしないと手に入らないため、手軽にどの環境でも使えるようウェブブラウザで動作するものを作りました。
+Adobe Flashを使用していないので、ブラウザがあればパソコンやスマホなどどの環境でも動作します。
+</li>
+
+<li>アナログ時計の背景色が変更できます。
+iOSのSafariでは稀に読み込まれない場合があり、その際は再読み込み等行ってみて下さい。
+</li>
+
+<li>アナログ時計の上にデジタル式で年月日、曜日、時分秒も表示しています。
+年は西暦と和暦を表示しています。
+「今、令和何年だっけ？」といったときも困りません。
+</li>
+
+<li>HTML5、Canvas要素、JavaScriptを使用しています。
+古いブラウザでは動作しない可能性があります。
+</li>
+</ul>
+
+
+
+
+
+
+
+</div>
+<!-- /page_main -->
+
+
+<hr>
+
+
+<!-- サブ -->
+<div id="page_sub">
+
+<!-- SNSボタン -->
+<div class="page_sbox sns_button">
+<span class="sns_b_item sns_b_hatena">
+<a href="https://b.hatena.ne.jp/entry/" class="hatena-bookmark-button" data-hatena-bookmark-layout="vertical-large" data-hatena-bookmark-lang="ja" title="このエントリーをはてなブックマークに追加"><img src="https://b.st-hatena.com/images/v4/public/entry-button/button-only@2x.png" alt="このエントリーをはてなブックマークに追加" width="20" height="20" style="border: none;" /></a><script type="text/javascript" src="https://b.st-hatena.com/js/bookmark_button.js" charset="utf-8" async="async"></script>
+</span>
+<span class="sns_b_item sns_b_pocket">
+<a data-pocket-label="pocket" data-pocket-count="vertical" class="pocket-btn" data-lang="en"></a>
+<script type="text/javascript">!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+</span>
+<span class="sns_b_item sns_b_facebook">
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v10.0"></script>
+<div class="fb-like" data-width="" data-layout="box_count" data-action="like" data-size="small" data-share="true"></div>
+</span>
+<span class="sns_b_item sns_b_twitter">
+<a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</span>
+</div>
+
+
+
+<div id="page_category" class="page_sbox">
+<h4>カテゴリ</h4>
+<ul>
+<li><a href="/tool/">ウェブツール</a></li>
+<li><a href="./denkidai.php">電気代計算</a></li>
+<li><a href="./wbgt.php">暑さ指数</a></li>
+<li><a href="./rune_moji_latin_alphabet_henkan.php">ルーン文字変換</a></li>
+<li><a href="./ppi_dpi.php">画素密度</a></li>
+<li><a href="./ip_address_country.php">IPアドレス検索</a></li>
+</ul>
+</div>
+
+
+
+</div>
+<!-- /page_sub -->
+</div>
+<!-- /page_wrap -->
+</div>
+<!-- /page_content -->
+
+
+
+<!-- フッター -->
+<footer id="page_footer">
+<div class="page_wrap">
+<div>Copyright &copy; testpage.jp</div>
+</div>
+</footer>
+
+
+<script async src="/data/access/access.js"></script>
+
+
+</body>
+</html>
